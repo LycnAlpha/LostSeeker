@@ -18,9 +18,7 @@ class _UpdateState extends State<Update> {
 
   @override
   void initState() {
-    setState(() {
-      getUserProfile();
-    });
+    getUserProfile();
     super.initState();
   }
 
@@ -55,6 +53,7 @@ class _UpdateState extends State<Update> {
               Column(
                 children: <Widget>[
                   TextField(
+                    controller: _username,
                     decoration: InputDecoration(
                         hintText: "Username",
                         border: OutlineInputBorder(
@@ -67,6 +66,7 @@ class _UpdateState extends State<Update> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+                    controller: _email,
                     decoration: InputDecoration(
                         hintText: "Email",
                         border: OutlineInputBorder(
@@ -79,6 +79,7 @@ class _UpdateState extends State<Update> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+                    controller: _contactNumber,
                     decoration: InputDecoration(
                       hintText: "Contact",
                       border: OutlineInputBorder(
@@ -89,7 +90,6 @@ class _UpdateState extends State<Update> {
                       filled: true,
                       prefixIcon: const Icon(Icons.phone),
                     ),
-                    obscureText: true,
                   ),
                 ],
               ),
@@ -137,14 +137,20 @@ class _UpdateState extends State<Update> {
   void getUserProfile() async {
     try {
       final uid = await SharedPreferenceHelper.getUserID();
-      final DocumentSnapshot snapShot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final DocumentSnapshot snapShot = await FirebaseFirestore.instance
+          .collection('users')
+          .withConverter(
+              fromFirestore: UserModel.fromFirestore,
+              toFirestore: (UserModel user, options) => user.toFirestore())
+          .doc(uid)
+          .get();
 
       UserModel user = snapShot.data() as UserModel;
-
-      _username.text = user.username.toString();
-      _email.text = user.email.toString();
-      _contactNumber.text = user.contactNumber.toString();
+      setState(() {
+        _username.text = user.username.toString();
+        _contactNumber.text = user.contactNumber.toString();
+        _email.text = user.email.toString();
+      });
     } catch (e) {
       showErrorSnackbar(context, e.toString());
     }

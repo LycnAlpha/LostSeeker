@@ -38,6 +38,7 @@ class ItemModel {
       if (location != null) 'location': location,
       if (category != null) 'category': category,
       if (userID != null) 'userID': userID,
+      if (contactNumber != null) 'contactNumber': contactNumber,
     };
   }
 }

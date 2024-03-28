@@ -5,8 +5,30 @@ import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/profile.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
 
-class Message extends StatelessWidget {
+class Message extends StatefulWidget {
   const Message({Key? key}) : super(key: key);
+
+  @override
+  State<Message> createState() => _MessageState();
+}
+
+class _MessageState extends State<Message> {
+  String uid = '';
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        getUserID();
+      });
+    });
+
+    super.initState();
+  }
+
+  void getUserID() async {
+    uid = await SharedPreferenceHelper.getUserID();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,27 +38,34 @@ class Message extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.blue[800],
       ),
-      body: Container(
-        width: 400,
-        height: 300,
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const Text(
-              'Receieved Messages',
-              style: TextStyle(color: Colors.white),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(10),
             ),
-            const SizedBox(height: 20), // Adding space between text and buttons
-            myMessagesList(),
-          ],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    'Receieved Messages',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+                myMessagesList(),
+              ],
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: Container(
@@ -102,10 +131,10 @@ class Message extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              getSenderUsername(snap['senderID'], context),
+              snap['senderUsername'],
               style:
                   const TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
@@ -114,11 +143,11 @@ class Message extends StatelessWidget {
               style: TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
             ),
             Text(
-              '${snap['date']}',
+              'Conatct Number: ${snap['senderContactNumber']}',
               style: TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
             ),
             Text(
-              'Conatct Number: ${getSenderContact(snap['senderID'], context)}',
+              '${snap['date']}',
               style: TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
             ),
           ],
@@ -128,61 +157,29 @@ class Message extends StatelessWidget {
   }
 
   Widget myMessagesList() {
-    final uid = SharedPreferenceHelper.getUserID();
     return Expanded(
-      child: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('items')
-              .where('receiverID', isEqualTo: uid)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: ((context, index) => Container(
-                      child: messageCard(
-                          snapshot.data!.docs[index].data(), context),
-                    )));
-          }),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('messages')
+                .where('receiverID', isEqualTo: uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: ((context, index) => Container(
+                        child: messageCard(
+                            snapshot.data!.docs[index].data(), context),
+                      )));
+            }),
+      ),
     );
-  }
-
-  String getSenderUsername(senderID, BuildContext context) {
-    String senderUsername = '';
-    try {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(senderID)
-          .get()
-          .then((value) {
-        senderUsername = value['username'];
-      });
-    } catch (e) {
-      showErrorSnackbar(e.toString(), context);
-    }
-
-    return senderUsername;
-  }
-
-  String getSenderContact(sendeID, BuildContext context) {
-    String senderContactNumber = '';
-    try {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(sendeID)
-          .get()
-          .then((value) {
-        senderContactNumber = value['contactNumber'];
-      });
-    } catch (e) {
-      showErrorSnackbar(e.toString(), context);
-    }
-
-    return senderContactNumber;
   }
 
   void showErrorSnackbar(message, BuildContext context) {

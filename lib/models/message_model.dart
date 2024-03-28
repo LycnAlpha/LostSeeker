@@ -6,6 +6,7 @@ class MessageModel {
   final String? message;
   final String? date;
   final String? senderUsername;
+  final String? senderContactNumber;
 
   MessageModel({
     this.senderID,
@@ -13,6 +14,7 @@ class MessageModel {
     this.message,
     this.date,
     this.senderUsername,
+    this.senderContactNumber,
   });
 
   factory MessageModel.fromFirestore(
@@ -25,7 +27,8 @@ class MessageModel {
         receiverID: data?['receiverID'],
         message: data?['message'],
         date: data?['date'],
-        senderUsername: data?['senderUsername']);
+        senderUsername: data?['senderUsername'],
+        senderContactNumber: data?['senderContactNumber']);
   }
 
   Map<String, dynamic> toFirestore() {
@@ -35,6 +38,8 @@ class MessageModel {
       if (message != null) 'message': message,
       if (date != null) 'date': date,
       if (senderUsername != null) 'senderUsername': senderUsername,
+      if (senderContactNumber != null)
+        'senderContactNumber': senderContactNumber,
     };
   }
 }

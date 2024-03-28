@@ -10,6 +10,23 @@ class Activity extends StatefulWidget {
 }
 
 class _ActivityState extends State<Activity> {
+  String uid = '';
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        getUserID();
+      });
+    });
+
+    super.initState();
+  }
+
+  void getUserID() async {
+    uid = await SharedPreferenceHelper.getUserID();
+  }
+
   void deleteItem(docID, BuildContext context) {
     try {
       final db = FirebaseFirestore.instance;
@@ -56,33 +73,43 @@ class _ActivityState extends State<Activity> {
         centerTitle: true,
         backgroundColor: Colors.blue[800],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              width: 400,
-              height: 100,
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  const Text(
-                    'My Activity',
-                    style: TextStyle(color: Colors.white),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  myItemsList(),
-                ],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          'My Activity',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      myItemsList(),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -108,13 +135,18 @@ class _ActivityState extends State<Activity> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: SizedBox(
-                height: 100,
-                child: Image.network(snap['imageUrl']),
-              ),
-            ),
+            snap['image'].toString() != ''
+                ? CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage('${snap['image']}'),
+                  )
+                : CircleAvatar(
+                    radius: 40,
+                    child: Text(
+                      snap['category'].toString().substring(0, 1),
+                      style: const TextStyle(fontSize: 25),
+                    ),
+                  ),
             const SizedBox(
               width: 15.0,
             ),
@@ -131,17 +163,17 @@ class _ActivityState extends State<Activity> {
                   Text(
                     'Category: ${snap['category']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                   Text(
                     'Location: ${snap['location']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                   Text(
                     'Conatct Number: ${snap['contactNumber']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -163,26 +195,33 @@ class _ActivityState extends State<Activity> {
   }
 
   Widget myItemsList() {
-    final uid = SharedPreferenceHelper.getUserID();
     return Expanded(
-      child: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('items')
-              .where('userID', isEqualTo: uid)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: ((context, index) => Container(
-                      child: itemCard(snapshot.data!.docs[index].data(),
-                          snapshot.data!.docs[index].id, context),
-                    )));
-          }),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('items')
+                .where('userID', isEqualTo: uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              } else {
+                return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: ((context, index) => Container(
+                          child: itemCard(snapshot.data!.docs[index].data(),
+                              snapshot.data!.docs[index].id, context),
+                        )));
+              }
+            }),
+      ),
     );
   }
 }

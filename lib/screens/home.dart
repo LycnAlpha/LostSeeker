@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mobile/models/message_model.dart';
+import 'package:flutter_mobile/models/user_model.dart';
 import 'package:flutter_mobile/screens/add.dart';
 import 'package:flutter_mobile/screens/message.dart';
 import 'package:flutter_mobile/screens/profile.dart';
@@ -22,11 +24,23 @@ class _HomeState extends State<Home> {
       final uid = await SharedPreferenceHelper.getUserID();
       final db = FirebaseFirestore.instance;
 
+      final DocumentSnapshot snapShot = await FirebaseFirestore.instance
+          .collection('users')
+          .withConverter(
+              fromFirestore: UserModel.fromFirestore,
+              toFirestore: (UserModel user, options) => user.toFirestore())
+          .doc(uid)
+          .get();
+
+      UserModel user = snapShot.data() as UserModel;
+
       MessageModel message = MessageModel(
           senderID: uid,
           receiverID: receiverID,
           message: _message.text,
-          date: DateFormat('yyyy-MM-dd hh-mm a').format(DateTime.now()));
+          date: DateFormat('yyyy-MM-dd hh-mm a').format(DateTime.now()),
+          senderContactNumber: user.contactNumber,
+          senderUsername: user.username);
 
       final docRef = db
           .collection('messages')
@@ -52,45 +66,58 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         backgroundColor: Colors.blue[800],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              width: 400,
-              height: 50,
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'ALl Items',
-                    style: TextStyle(color: Colors.white),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text(
+                            'All Items',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25.0,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Adding space between text and buttons
+                        itemsList()
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  // Adding space between text and buttons
-                  itemsList()
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
       bottomNavigationBar: Container(
         color: Colors.blue[800],
@@ -160,13 +187,18 @@ class _HomeState extends State<Home> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: SizedBox(
-                height: 100,
-                child: Image.network(snap['imageUrl']),
-              ),
-            ),
+            snap['image'].toString() != ''
+                ? CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage('${snap['image']}'),
+                  )
+                : CircleAvatar(
+                    radius: 40,
+                    child: Text(
+                      snap['category'].toString().substring(0, 1),
+                      style: const TextStyle(fontSize: 25),
+                    ),
+                  ),
             const SizedBox(
               width: 15.0,
             ),
@@ -183,17 +215,17 @@ class _HomeState extends State<Home> {
                   Text(
                     'Category: ${snap['category']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                   Text(
                     'Location: ${snap['location']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                   Text(
                     'Conatct Number: ${snap['contactNumber']}',
                     style:
-                        TextStyle(fontSize: 15.0, color: Colors.grey.shade600),
+                        TextStyle(fontSize: 12.0, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -216,20 +248,23 @@ class _HomeState extends State<Home> {
 
   Widget itemsList() {
     return Expanded(
-      child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('items').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: ((context, index) => Container(
-                      child: itemCard(snapshot.data!.docs[index].data()),
-                    )));
-          }),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: StreamBuilder(
+            stream: FirebaseFirestore.instance.collection('items').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: ((context, index) => Container(
+                        child: itemCard(snapshot.data!.docs[index].data()),
+                      )));
+            }),
+      ),
     );
   }
 
@@ -252,57 +287,74 @@ class _HomeState extends State<Home> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Please enter your message below',
-                textAlign: TextAlign.center,
+              const Padding(
+                padding: EdgeInsets.only(bottom: 15.0),
+                child: Text(
+                  'Please enter your message below',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
               ),
               TextField(
                 controller: _message,
                 decoration: InputDecoration(
-                    hintText: "Message",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide.none),
-                    fillColor:
-                        const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.message)),
+                  hintText: "Message",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
+                  fillColor:
+                      const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
+                  filled: true,
+                ),
               ),
             ],
           ),
           actions: [
-            Container(
-                padding: const EdgeInsets.only(top: 3, left: 3),
-                child: ElevatedButton(
-                  onPressed: () {
-                    sendMessage(receiverID);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: const Color.fromARGB(255, 193, 235, 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      sendMessage(receiverID);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: Colors.lightGreen),
+                      padding: const EdgeInsets.all(10.0),
+                      child: const Text(
+                        "Send",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
-                  child: const Text(
-                    "Send Message",
-                    style: TextStyle(fontSize: 20),
+                ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: Colors.red),
+                      padding: const EdgeInsets.all(10.0),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
-                )),
-            Container(
-                padding: const EdgeInsets.only(top: 3, left: 3),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.red,
-                  ),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                )),
+                ),
+              ],
+            )
           ],
         ));
   }

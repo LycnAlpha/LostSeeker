@@ -34,56 +34,58 @@ class _AddState extends State<Add> {
         centerTitle: true,
         backgroundColor: Colors.blue[800],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          height: MediaQuery.of(context).size.height - 50,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const Column(
-                children: <Widget>[
-                  SizedBox(height: 60.0),
-                  Text(
-                    "Add Item",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              Center(
-                child: Stack(
-                  children: [
-                    _image != null
-                        ? CircleAvatar(
-                            radius: 100,
-                            backgroundImage: MemoryImage(_image!),
-                          )
-                        : const CircleAvatar(
-                            radius: 100,
-                            backgroundImage: NetworkImage(
-                                "https://www.google.com/url?sa=i&url=https%3A%2F%2Fdepositphotos.com%2Fvectors%2Fuser-profile.html&psig=AOvVaw3r4DnES6jSQgO3ubuM7BtW&ust=1710902982920000&source=images&cd=vfe&opi=89978449&ved=0CBMQjRxqFwoTCMjMrrao_4QDFQAAAAAdAAAAABAJ"),
-                          ),
-                    Positioned(
-                      bottom: 0,
-                      left: 140,
-                      child: IconButton(
-                        onPressed: () {
-                          showImagePickerOption(context);
-                        },
-                        icon: const Icon(Icons.add_a_photo),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                const Column(
+                  children: <Widget>[
+                    Text(
+                      "Add Item",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Column(
-                children: <Widget>[
-                  TextField(
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        _image != null
+                            ? CircleAvatar(
+                                radius: 100,
+                                backgroundImage: MemoryImage(_image!),
+                              )
+                            : const CircleAvatar(
+                                radius: 100,
+                                backgroundImage: NetworkImage(
+                                    "https://www.google.com/url?sa=i&url=https%3A%2F%2Fdepositphotos.com%2Fvectors%2Fuser-profile.html&psig=AOvVaw3r4DnES6jSQgO3ubuM7BtW&ust=1710902982920000&source=images&cd=vfe&opi=89978449&ved=0CBMQjRxqFwoTCMjMrrao_4QDFQAAAAAdAAAAABAJ"),
+                              ),
+                        Positioned(
+                          bottom: 0,
+                          left: 140,
+                          child: IconButton(
+                            onPressed: () {
+                              showImagePickerOption(context);
+                            },
+                            icon: const Icon(Icons.add_a_photo),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: TextField(
                     controller: _title,
                     decoration: InputDecoration(
                         hintText: "Title",
@@ -95,8 +97,10 @@ class _AddState extends State<Add> {
                         filled: true,
                         prefixIcon: const Icon(Icons.title)),
                   ),
-                  const SizedBox(height: 20),
-                  TextField(
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: TextField(
                     controller: _location,
                     decoration: InputDecoration(
                         hintText: "Location",
@@ -108,8 +112,10 @@ class _AddState extends State<Add> {
                         filled: true,
                         prefixIcon: const Icon(Icons.location_city)),
                   ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       hintText: "Category",
                       border: OutlineInputBorder(
@@ -135,8 +141,10 @@ class _AddState extends State<Add> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
-                  TextField(
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: TextField(
                     controller: _contactNumber,
                     decoration: InputDecoration(
                       hintText: "Contact",
@@ -148,12 +156,10 @@ class _AddState extends State<Add> {
                       filled: true,
                       prefixIcon: const Icon(Icons.mobile_friendly),
                     ),
-                    obscureText: true,
                   ),
-                ],
-              ),
-              Container(
-                  padding: const EdgeInsets.only(top: 3, left: 3),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
                   child: ElevatedButton(
                     onPressed: () {
                       saveItemDetails();
@@ -167,8 +173,10 @@ class _AddState extends State<Add> {
                       "Add Item",
                       style: TextStyle(fontSize: 20),
                     ),
-                  )),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -300,6 +308,7 @@ class _AddState extends State<Add> {
   }
 
   void uploadImage() async {
+    String url = '';
     try {
       final uid = await SharedPreferenceHelper.getUserID();
       final storageRef = FirebaseStorage.instance.ref();
@@ -309,9 +318,13 @@ class _AddState extends State<Add> {
                 'items/$uid/${_title.text}_${_location.text}_$selectedCategory.${selectedImage!.path.split('.').last}')
             .putFile(selectedImage!);
 
-        imageUrl = await storageRef.getDownloadURL();
+        url = await storageRef.getDownloadURL();
+        setState(() {
+          imageUrl = url;
+        });
       }
     } catch (e) {
+      print(e.toString());
       showErrorSnackbar(e.toString());
     }
   }
