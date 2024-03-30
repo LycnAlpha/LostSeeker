@@ -1,16 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile/firebase_options.dart';
 import 'package:flutter_mobile/screens/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: 'AIzaSyBovs_BpiEdDcO-bUzRcw31x4eGDvS8QM8',
-          appId: '1:875812744087:android:57dddc753ec648f9cab2d2',
-          messagingSenderId: '875812744087',
-          projectId: 'lost-seeker-26e39',
-          storageBucket: 'gs://lost-seeker-26e39.appspot.com'));
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

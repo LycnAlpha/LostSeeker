@@ -17,15 +17,17 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _header(context),
-            _inputField(context),
-            _signup(context),
-          ],
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _header(context),
+              _inputField(context),
+              _signup(context),
+            ],
+          ),
         ),
       ),
     );
@@ -42,11 +44,11 @@ class _LoginPageState extends State<LoginPage> {
             fit: BoxFit.cover, // Adjust the fit as needed
           ),
         ),
-        Text(
+        const Text(
           "Lost Seeker",
           style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
         ),
-        Text("Enter your credentials to login"),
+        const Text("Enter your credentials to login"),
       ],
     );
   }
@@ -64,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
+            fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.person),
           ),
@@ -79,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
+            fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.lock),
           ),
@@ -93,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Color.fromARGB(255, 193, 235, 8),
+            backgroundColor: const Color.fromARGB(255, 193, 235, 8),
           ),
           child: const Text(
             "Login",
@@ -113,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SignupPage()),
+              MaterialPageRoute(builder: (context) => const SignupPage()),
             );
           },
           child: const Text(
