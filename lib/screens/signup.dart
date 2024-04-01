@@ -5,6 +5,7 @@ import 'package:flutter_mobile/models/user_model.dart';
 import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/login.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -190,33 +191,28 @@ class _SignupPageState extends State<SignupPage> {
       await auth.createUserWithEmailAndPassword(
           email: _email.text, password: _password.text);
       login();
-      saveUserProfile();
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const Home()),
-      );
     } catch (e) {
+      print(e.toString());
       showErrorSnackbar(e.toString());
     }
   }
 
   void login() async {
     try {
+      SharedPreferences sh = await SharedPreferences.getInstance();
+      sh.remove('USER_ID');
       FirebaseAuth auth = FirebaseAuth.instance;
       await auth.signInWithEmailAndPassword(
           email: _email.text, password: _password.text);
       final user = auth.currentUser;
       if (user != null) {
         SharedPreferenceHelper.saveUserID(user.uid);
+        saveUserProfile();
       } else {
         showErrorSnackbar('Signup Failed');
       }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const Home()),
-      );
     } catch (e) {
+      print(e.toString());
       showErrorSnackbar(e.toString());
     }
   }
@@ -240,8 +236,14 @@ class _SignupPageState extends State<SignupPage> {
           .doc(uid);
 
       docRef.set(user);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Home()),
+      );
     } catch (e) {
       showErrorSnackbar(e.toString());
+      print(e.toString());
     }
   }
 

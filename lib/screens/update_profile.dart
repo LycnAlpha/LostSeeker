@@ -162,7 +162,7 @@ class _UpdateState extends State<Update> {
       final db = FirebaseFirestore.instance;
 
       db.collection('users').doc(uid).update({
-        'userName': _username.text,
+        'username': _username.text,
         'contactNumber': _contactNumber.text,
         'email': _email.text
       });

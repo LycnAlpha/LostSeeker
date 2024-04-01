@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/signup.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,7 +22,9 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           margin: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.max,
             children: [
               _header(context),
               _inputField(context),
@@ -34,60 +37,72 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _header(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 200, // Adjust the height as needed
-          width: 150, // Adjust the width as needed
-          child: Image.asset(
-            'assets/images/logo1.png', // Replace this with your image path
-            fit: BoxFit.cover, // Adjust the fit as needed
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 200, // Adjust the height as needed
+            width: 150, // Adjust the width as needed
+            child: Image.asset(
+              'assets/images/logo1.png', // Replace this with your image path
+              fit: BoxFit.cover, // Adjust the fit as needed
+            ),
           ),
-        ),
-        const Text(
-          "Lost Seeker",
-          style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-        ),
-        const Text("Enter your credentials to login"),
-      ],
+          const Text(
+            "Lost Seeker",
+            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+          ),
+          const Text("Enter your credentials to login"),
+          const SizedBox(
+            height: 50.0,
+          )
+        ],
+      ),
     );
   }
 
   Widget _inputField(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          controller: _email,
-          decoration: InputDecoration(
-            labelText: "Email",
-            hintText: "Enter your email",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: TextField(
+            controller: _email,
+            decoration: InputDecoration(
+              labelText: "Email",
+              hintText: "Enter your email",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+              fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
+              filled: true,
+              prefixIcon: const Icon(Icons.person),
             ),
-            fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
-            filled: true,
-            prefixIcon: const Icon(Icons.person),
           ),
         ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _password,
-          decoration: InputDecoration(
-            labelText: "Password",
-            hintText: "Enter your password",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: TextField(
+            controller: _password,
+            decoration: InputDecoration(
+              labelText: "Password",
+              hintText: "Enter your password",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+              fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
+              filled: true,
+              prefixIcon: const Icon(Icons.lock),
             ),
-            fillColor: const Color.fromARGB(255, 40, 5, 238).withOpacity(0.1),
-            filled: true,
-            prefixIcon: const Icon(Icons.lock),
+            obscureText: true,
           ),
-          obscureText: true,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 50),
         ElevatedButton(
           onPressed: () {
             login();
@@ -101,6 +116,9 @@ class _LoginPageState extends State<LoginPage> {
             "Login",
             style: TextStyle(fontSize: 20),
           ),
+        ),
+        const SizedBox(
+          height: 50.0,
         )
       ],
     );
@@ -129,6 +147,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void login() async {
     try {
+      SharedPreferences sh = await SharedPreferences.getInstance();
+      sh.remove('USER_ID');
       FirebaseAuth auth = FirebaseAuth.instance;
       await auth.signInWithEmailAndPassword(
           email: _email.text, password: _password.text);

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile/models/item_model.dart';
+import 'package:flutter_mobile/screens/activity.dart';
 import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/message.dart';
 import 'package:flutter_mobile/screens/profile.dart';
@@ -25,7 +26,7 @@ class _AddState extends State<Add> {
   Uint8List? _image;
   File? selectedImage;
   String? selectedCategory;
-  String imageUrl = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,7 +163,7 @@ class _AddState extends State<Add> {
                   padding: const EdgeInsets.only(bottom: 15.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      saveItemDetails();
+                      uploadImage();
                     },
                     style: ElevatedButton.styleFrom(
                       shape: const StadiumBorder(),
@@ -308,19 +309,36 @@ class _AddState extends State<Add> {
   }
 
   void uploadImage() async {
-    String url = '';
     try {
       final uid = await SharedPreferenceHelper.getUserID();
       final storageRef = FirebaseStorage.instance.ref();
       if (selectedImage != null) {
-        storageRef
+        final uploadTask = storageRef
             .child(
                 'items/$uid/${_title.text}_${_location.text}_$selectedCategory.${selectedImage!.path.split('.').last}')
             .putFile(selectedImage!);
 
-        url = await storageRef.getDownloadURL();
-        setState(() {
-          imageUrl = url;
+        uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
+          switch (taskSnapshot.state) {
+            case TaskState.running:
+              final progress = 100.0 *
+                  (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+              showSuccessSnackbar("Upload is $progress% complete.");
+
+              break;
+            case TaskState.paused:
+              showErrorSnackbar('Image upload paused');
+              break;
+            case TaskState.canceled:
+              showErrorSnackbar('Image upload canceled');
+              break;
+            case TaskState.error:
+              showErrorSnackbar('Image upload error occured');
+              break;
+            case TaskState.success:
+              saveItemDetails(storageRef);
+              break;
+          }
         });
       }
     } catch (e) {
@@ -329,9 +347,9 @@ class _AddState extends State<Add> {
     }
   }
 
-  void saveItemDetails() async {
-    uploadImage();
+  void saveItemDetails(storageRef) async {
     try {
+      final String imageUrl = await storageRef.getDownloadURL();
       final uid = await SharedPreferenceHelper.getUserID();
       final db = FirebaseFirestore.instance;
 
@@ -350,7 +368,13 @@ class _AddState extends State<Add> {
               toFirestore: (ItemModel item, options) => item.toFirestore())
           .doc();
       docRef.set(item);
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Activity()),
+      );
     } catch (e) {
+      print(e.toString());
       showErrorSnackbar(e.toString());
     }
   }
@@ -363,6 +387,20 @@ class _AddState extends State<Add> {
           style: const TextStyle(color: Colors.white, fontSize: 16.0),
         ),
         backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        showCloseIcon: false,
+      ),
+    );
+  }
+
+  void showSuccessSnackbar(message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white, fontSize: 16.0),
+        ),
+        backgroundColor: Colors.green,
         duration: const Duration(seconds: 3),
         showCloseIcon: false,
       ),
