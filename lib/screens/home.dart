@@ -7,6 +7,7 @@ import 'package:flutter_mobile/screens/add.dart';
 import 'package:flutter_mobile/screens/message.dart';
 import 'package:flutter_mobile/screens/profile.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
@@ -52,7 +53,7 @@ class _HomeState extends State<Home> {
 
       docRef.set(message);
       Navigator.pop(context);
-      showSuccessSnackbar('Message Sent Successfully');
+      showSuccessToast('Message Sent Successfully');
     } catch (e) {
       showErrorSnackbar(e.toString());
     }
@@ -188,9 +189,17 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             snap['image'].toString() != ''
-                ? CircleAvatar(
-                    radius: 40,
-                    backgroundImage: NetworkImage('${snap['image']}'),
+                ? GestureDetector(
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: ((context) =>
+                              viewImageDialog(snap['image'])));
+                    },
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: NetworkImage('${snap['image']}'),
+                    ),
                   )
                 : CircleAvatar(
                     radius: 40,
@@ -244,6 +253,44 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  Widget viewImageDialog(imageUrl) {
+    return PopScope(
+        child: AlertDialog(
+      title: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+            "Image",
+            style: TextStyle(
+              fontSize: 25.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.cancel,
+              color: Colors.redAccent,
+              size: 40.0,
+            ),
+          ),
+        ],
+      ),
+      titlePadding: const EdgeInsets.all(15.0),
+      contentPadding: const EdgeInsets.all(15.0),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      content: SizedBox(
+        height: 200,
+        child: Image.network(imageUrl),
+      ),
+    ));
   }
 
   Widget itemsList() {
@@ -373,17 +420,15 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void showSuccessSnackbar(message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white, fontSize: 16.0),
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-        showCloseIcon: false,
-      ),
-    );
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 }

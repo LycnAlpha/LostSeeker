@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobile/models/user_model.dart';
 import 'package:flutter_mobile/screens/profile.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Update extends StatefulWidget {
   const Update({Key? key}) : super(key: key);
@@ -67,6 +68,7 @@ class _UpdateState extends State<Update> {
                   const SizedBox(height: 20),
                   TextField(
                     controller: _email,
+                    readOnly: true,
                     decoration: InputDecoration(
                         hintText: "Email",
                         border: OutlineInputBorder(
@@ -164,8 +166,9 @@ class _UpdateState extends State<Update> {
       db.collection('users').doc(uid).update({
         'username': _username.text,
         'contactNumber': _contactNumber.text,
-        'email': _email.text
       });
+
+      showSuccessToast("Profile update successfull");
 
       Navigator.push(
         context,
@@ -188,5 +191,17 @@ class _UpdateState extends State<Update> {
         showCloseIcon: false,
       ),
     );
+  }
+
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 }

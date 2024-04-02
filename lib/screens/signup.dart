@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile/models/user_model.dart';
-import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/login.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupPage extends StatefulWidget {
@@ -212,7 +212,6 @@ class _SignupPageState extends State<SignupPage> {
         showErrorSnackbar('Signup Failed');
       }
     } catch (e) {
-      print(e.toString());
       showErrorSnackbar(e.toString());
     }
   }
@@ -237,9 +236,11 @@ class _SignupPageState extends State<SignupPage> {
 
       docRef.set(user);
 
+      showSuccessToast('Signup Success');
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
       showErrorSnackbar(e.toString());
@@ -259,5 +260,17 @@ class _SignupPageState extends State<SignupPage> {
         showCloseIcon: false,
       ),
     );
+  }
+
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 }

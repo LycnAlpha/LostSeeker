@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Activity extends StatefulWidget {
   const Activity({Key? key}) : super(key: key);
@@ -31,7 +32,7 @@ class _ActivityState extends State<Activity> {
     try {
       final db = FirebaseFirestore.instance;
       db.collection('items').doc(docID).delete();
-      showSuccessSnackbar('Item Deleted Successfully', context);
+      showSuccessToast('Item Deleted Successfully');
     } catch (e) {
       showErrorSnackbar(e.toString(), context);
     }
@@ -51,18 +52,16 @@ class _ActivityState extends State<Activity> {
     );
   }
 
-  void showSuccessSnackbar(message, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white, fontSize: 16.0),
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-        showCloseIcon: false,
-      ),
-    );
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 
   @override
@@ -136,9 +135,17 @@ class _ActivityState extends State<Activity> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             snap['image'].toString() != ''
-                ? CircleAvatar(
-                    radius: 40,
-                    backgroundImage: NetworkImage('${snap['image']}'),
+                ? GestureDetector(
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: ((context) =>
+                              viewImageDialog(snap['image'])));
+                    },
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: NetworkImage('${snap['image']}'),
+                    ),
                   )
                 : CircleAvatar(
                     radius: 40,
@@ -192,6 +199,44 @@ class _ActivityState extends State<Activity> {
         ),
       ),
     );
+  }
+
+  Widget viewImageDialog(imageUrl) {
+    return PopScope(
+        child: AlertDialog(
+      title: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+            "Image",
+            style: TextStyle(
+              fontSize: 25.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.cancel,
+              color: Colors.redAccent,
+              size: 40.0,
+            ),
+          ),
+        ],
+      ),
+      titlePadding: const EdgeInsets.all(15.0),
+      contentPadding: const EdgeInsets.all(15.0),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      content: SizedBox(
+        height: 200,
+        child: Image.network(imageUrl),
+      ),
+    ));
   }
 
   Widget myItemsList() {

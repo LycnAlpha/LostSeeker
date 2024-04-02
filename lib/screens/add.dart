@@ -9,6 +9,7 @@ import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/message.dart';
 import 'package:flutter_mobile/screens/profile.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Add extends StatefulWidget {
@@ -312,18 +313,18 @@ class _AddState extends State<Add> {
     try {
       final uid = await SharedPreferenceHelper.getUserID();
       final storageRef = FirebaseStorage.instance.ref();
+      final imagesRef = storageRef.child('items');
+      final spaceRef = imagesRef.child(
+          '$uid/${_title.text}_${_location.text}_$selectedCategory.${selectedImage!.path.split('.').last}');
       if (selectedImage != null) {
-        final uploadTask = storageRef
-            .child(
-                'items/$uid/${_title.text}_${_location.text}_$selectedCategory.${selectedImage!.path.split('.').last}')
-            .putFile(selectedImage!);
+        final uploadTask = spaceRef.putFile(selectedImage!);
 
         uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
           switch (taskSnapshot.state) {
             case TaskState.running:
               final progress = 100.0 *
                   (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
-              showSuccessSnackbar("Upload is $progress% complete.");
+              showSuccessToast("Upload is $progress% complete.");
 
               break;
             case TaskState.paused:
@@ -336,7 +337,7 @@ class _AddState extends State<Add> {
               showErrorSnackbar('Image upload error occured');
               break;
             case TaskState.success:
-              saveItemDetails(storageRef);
+              saveItemDetails(spaceRef);
               break;
           }
         });
@@ -368,6 +369,7 @@ class _AddState extends State<Add> {
               toFirestore: (ItemModel item, options) => item.toFirestore())
           .doc();
       docRef.set(item);
+      showSuccessToast('Item added successfully');
       Navigator.pop(context);
       Navigator.push(
         context,
@@ -393,17 +395,15 @@ class _AddState extends State<Add> {
     );
   }
 
-  void showSuccessSnackbar(message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white, fontSize: 16.0),
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-        showCloseIcon: false,
-      ),
-    );
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 }

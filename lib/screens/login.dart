@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobile/screens/home.dart';
 import 'package:flutter_mobile/screens/signup.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -159,6 +160,8 @@ class _LoginPageState extends State<LoginPage> {
         showErrorSnackbar('Login Failed');
       }
 
+      showSuccessToast("Login success");
+
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const Home()),
@@ -180,5 +183,17 @@ class _LoginPageState extends State<LoginPage> {
         showCloseIcon: false,
       ),
     );
+  }
+
+  void showSuccessToast(String message) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        fontSize: 16.0,
+        textColor: Colors.white,
+        backgroundColor: Colors.green);
   }
 }

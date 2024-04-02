@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "875812744087",
-    "project_id": "lost-seeker-26e39",
-    "storage_bucket": "lost-seeker-26e39.appspot.com"
+    "project_number": "468000265929",
+    "project_id": "lost-seeker-79f53",
+    "storage_bucket": "lost-seeker-79f53.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:875812744087:android:75d5f2ed697f57ffcab2d2",
-        "android_client_info": {
-          "package_name": "com.example.flutter_application_5"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBovs_BpiEdDcO-bUzRcw31x4eGDvS8QM8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:875812744087:android:57dddc753ec648f9cab2d2",
+        "mobilesdk_app_id": "1:468000265929:android:407218fe3b694eaeb49f18",
         "android_client_info": {
           "package_name": "com.example.flutter_mobile"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBovs_BpiEdDcO-bUzRcw31x4eGDvS8QM8"
+          "current_key": "AIzaSyCsNQB8YLqYUQT6A9Mt23_DNClctoIy72I"
         }
       ],
       "services": {
