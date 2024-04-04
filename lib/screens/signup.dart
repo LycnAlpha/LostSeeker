@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mobile/models/user_model.dart';
 import 'package:flutter_mobile/screens/login.dart';
 import 'package:flutter_mobile/shared_preference_helper.dart';
@@ -27,126 +28,128 @@ class _SignupPageState extends State<SignupPage> {
           padding: const EdgeInsets.symmetric(horizontal: 40),
           height: MediaQuery.of(context).size.height - 50,
           width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  const SizedBox(height: 60.0),
-                  const Text(
-                    "Sign up",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    const SizedBox(height: 60.0),
+                    const Text(
+                      "Sign up",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Create your account",
-                    style: TextStyle(fontSize: 15, color: Colors.grey[700]),
-                  )
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  TextField(
-                    controller: _username,
-                    decoration: InputDecoration(
-                        hintText: "Username",
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Create your account",
+                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                    )
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: _username,
+                      decoration: InputDecoration(
+                          hintText: "Username",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none),
+                          fillColor: const Color.fromARGB(255, 40, 5, 238)
+                              .withOpacity(0.1),
+                          filled: true,
+                          prefixIcon: const Icon(Icons.person)),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _email,
+                      decoration: InputDecoration(
+                          hintText: "Email",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none),
+                          fillColor: const Color.fromARGB(255, 40, 5, 238)
+                              .withOpacity(0.1),
+                          filled: true,
+                          prefixIcon: const Icon(Icons.email)),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _contactNumber,
+                      decoration: InputDecoration(
+                        hintText: "Contact",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide.none),
                         fillColor: const Color.fromARGB(255, 40, 5, 238)
                             .withOpacity(0.1),
                         filled: true,
-                        prefixIcon: const Icon(Icons.person)),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _email,
-                    decoration: InputDecoration(
-                        hintText: "Email",
+                        prefixIcon: const Icon(Icons.phone),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _password,
+                      decoration: InputDecoration(
+                        hintText: "Password",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide.none),
                         fillColor: const Color.fromARGB(255, 40, 5, 238)
                             .withOpacity(0.1),
                         filled: true,
-                        prefixIcon: const Icon(Icons.email)),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _contactNumber,
-                    decoration: InputDecoration(
-                      hintText: "Contact",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none),
-                      fillColor: const Color.fromARGB(255, 40, 5, 238)
-                          .withOpacity(0.1),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.phone),
+                        prefixIcon: const Icon(Icons.password),
+                      ),
+                      obscureText: true,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _password,
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none),
-                      fillColor: const Color.fromARGB(255, 40, 5, 238)
-                          .withOpacity(0.1),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.password),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.only(top: 3, left: 3),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_areTextFieldsFilled(context)) {
+                        signupUser();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: const Color.fromARGB(255, 193, 235, 8),
                     ),
-                    obscureText: true,
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.only(top: 3, left: 3),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_areTextFieldsFilled(context)) {
-                      signupUser();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: const Color.fromARGB(255, 193, 235, 8),
-                  ),
-                  child: const Text(
-                    "Sign up",
-                    style: TextStyle(fontSize: 20),
+                    child: const Text(
+                      "Sign up",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text("Already have an account?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()),
-                      );
-                    },
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(color: Colors.blue),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text("Already have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()),
+                        );
+                      },
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(color: Colors.blue),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

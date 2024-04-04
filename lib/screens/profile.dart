@@ -90,41 +90,43 @@ class _ProfileState extends State<Profile> {
                     child: Container(
                         padding: const EdgeInsets.all(10.0),
                         alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 60,
-                              child: Text(
-                                username.substring(0, 1),
-                                style: const TextStyle(
-                                    fontSize: 60.0, color: Colors.blue),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: 60,
+                                child: Text(
+                                  username.substring(0, 1),
+                                  style: const TextStyle(
+                                      fontSize: 60.0, color: Colors.blue),
+                                ),
                               ),
-                            ),
-                            Text(
-                              username,
-                              style: const TextStyle(
-                                  fontSize: 35.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white),
-                            ),
-                            Text(
-                              email,
-                              style: const TextStyle(
-                                  color: Colors.white60,
-                                  fontSize: 25.0,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            Text(
-                              contactNumber,
-                              style: const TextStyle(
-                                  color: Colors.white60,
-                                  fontSize: 25.0,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ],
+                              Text(
+                                username,
+                                style: const TextStyle(
+                                    fontSize: 35.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
+                              ),
+                              Text(
+                                email,
+                                style: const TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 25.0,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                contactNumber,
+                                style: const TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 25.0,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
                         )),
                   ),
                 ),
